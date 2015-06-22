@@ -31,8 +31,8 @@ public class TautologyCheck {
         boolean isTautology;
         if(i<0){
             isTautology = evaluateStatement(st);
-            //System.out.println(st);
-            return true;
+            System.out.println(st);
+            return isTautology;
         }
         String temp = st.replaceAll(Character.toString(voc.charAt(i)),"0");
         isTautology = checkTautology(voc, temp, i-1);
@@ -44,20 +44,29 @@ public class TautologyCheck {
     }
     
      private boolean evaluateStatement(String st) {
+         System.out.println("statement :"+st);
          for(int i=0; i< st.length(); i++){
                 char c = st.charAt(i);
+                System.out.println("\tcharacter read:"+c);
                 if(c=='0'){
                     this.values.push(Boolean.FALSE);
+                    System.out.println("\tfalse pushed");
                 }
                 else if(c=='1'){
                     this.values.push(Boolean.TRUE);
+                    System.out.println("\ttrue pushed");
                 }
                 else if(c=='('){
                     this.operators.push(c);
+                    System.out.println("\t'(' pushed");
                 }
                 else if(c==')'){
                     while(!operators.empty() && operators.peek()!='('){
                         doOperation();  
+                    }
+                    if(operators.peek()=='('){
+                        operators.pop();
+                        System.out.println("\t'(' popped");
                     }
                 }
                 else if(c=='&' || c=='|' || c=='!'){
@@ -65,40 +74,46 @@ public class TautologyCheck {
                             doOperation();
                         }
                         operators.push(c);
+                        System.out.println("\t"+ c + " pushed");
                 }
+                System.out.println("\t i:"+i+", values: "+values.toString()+", operators:"+operators.toString());
          }
          while(!operators.empty()){
              doOperation();
          }
+         System.out.println("RETURN VALUE: "+values.peek());
         return values.pop();
     }
      public void doOperation(){
                 char op = this.operators.peek();
-                 if(!(op=='!'))
+                 if(!(op=='!')){
                     values.push(evaluateOperation(values.pop(), values.pop(), operators.pop()));
+                 }
                 else if(op=='!')
                     values.push(evaluateOperation(true, values.pop(), operators.pop()));
      }
      public boolean checkPrecedence(char c, char op){
-         if(c==op){
+         if(op=='(')
+             return true;
+         if(c==op)
              return false;
-         }
-         else if(c=='!'){
+         else if(c=='!')
              return true;
-         }
-         else if(c=='&' && op=='|'){
+         else if(c=='&' && op=='|')
              return true;
-         }
         return false;   
      }
      public boolean evaluateOperation(boolean value1, boolean value2, char op){
          if(op=='|'){
+             System.out.println("\tevaluating: "+value1+" "+op+" "+value2+" : " + (value2 || value1));
              return value2 || value1;
          }
          else if(op=='&'){
+             System.out.println("\tevaluating: "+value1+" "+op+" "+value2+" : " + (value2 && value1));
              return value2 && value1;
          }
          else if(op=='!'){
+             System.out.println("\tevaluating: "+op+" "+value2+" : " + !value2);
              return !value2;
          }
          return false;    
